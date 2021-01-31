@@ -11,6 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HttpControllerTest {
 	
+	private static final String TAG = "HttpControllerTest : ";
+	
+	@GetMapping("/http/lombok")
+	public String lombokTest() {
+		Member m = Member.builder().username("ssar").password("1234").email("ssar@nate.com").build();
+		System.out.println(TAG + "getter : " + m.getId());
+		m.setId(5000);
+		System.out.println(TAG + "getter : " + m.getId());
+		return "lombok test complete!!";
+	}
+	
 	// 매개변수에서 @RequestParam 써서 하나씩 받거나,
 	// 객체(Member m)로 한번에 받을 수 있음 // MessageConverter (스프링부트)가 해줌
 	@GetMapping("/http/get")
