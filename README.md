@@ -102,6 +102,80 @@ public User updateUser(@PathVariable int id, @RequestBody User requestUser) {
 
 
 
+### 스프링 기본파싱전략과 json통신
+
+#### 1. Get 요청
+
+- 주소에 데이터를 담아 보냄
+  - http://localhost:8000/blog/user?username=ssar
+- key = value 형태의 데이터
+- 웹브라우저의 주소창에 쳐서 보내는 요청은 전부 get 요청
+- body로 데이터를 담아 보내지 않음
+  - http요청인데 body가 없음
+
+#### 2. Post, Put, Delete 요청 (데이터를 변경)
+
+- 보내야할 데이터의 양이 많거나 중요함
+  - 담아서 보냄
+- Post 요청
+  - 회원가입을 예로 들면
+  - username, password, email, address, ... 등 많은 데이터를 보내야함
+  - form 태그를 사용해서 보낼 수도 있음
+    - method='POST' 로해서 보냄
+    - 다만, 데이터의 형태가 key = value 형태인 경우에만 form 태그 사용
+    - form 태그는 Get요청과 Post요청만 가능
+- Put, Delete 요청
+  - form 태그로 요청 못함
+  - 자바스트립트로 요청을 해야함
+- form 태그의 한계를 고려해서 자바스크립트를 사용하는 방법으로 통일하는 것이 좋음
+  - Post, Put, Delete 통일
+  - 자바스크립트로 ajax요청 + 데이터는 json
+- 스프링에는 form:form 태그라는 것도 있음
+  - Get, Post, Put, Delete 요청도 가능함
+  - 사용은 안할거
+
+### 3. 스프링 컨트롤러의 파싱 전략 1
+
+- 스프링 컨트롤러는 key=value 형태의 데이터를 받으면 자동으로 파싱해서 변수에 담아줌(매개변수)
+- get 요청(key=value 형태)
+- post 요청 중에서 x-www-form-urlencoded(form태그, key=value 형태)
+- 일 경우에 다음과 같이 파라미터로 받을 수 있음
+
+```java
+PostMapping("/home")
+public String home(String username, String email) {
+	return "home";
+}
+```
+
+### 4. 스프링 컨트롤러의 파싱 전략 2
+
+- 스프링은 key=value 형태의 데이터를 오브젝트로 파싱해서 받아주는 역할도 함
+- 주의할점은 setter가 없으면 스프링이 파싱해서 넣어주지 못함
+  - 해당 데이터를 파싱해서 setter를 사용해서 오브젝트를 만들어줌
+
+### 5. key=value 형태가 아닌 데이터는 어떻게 파싱할까?
+
+- 이런 데이터는 자동적으로 파싱이 안되기 때문에 @RequestBody 어노테이션을 붙여서 받아줘야함
+- @RequestBody를 붙이면 MessageConverter 클래스를 구현한 Jackson 라이브러리가 발동하면서 json 데이터를 자바 오브젝트로 파싱하여 받아줌
+
+### 6. form 태그로 json데이터 요청방법
+
+- jsp나 html에서 form태그를 작성하고 button으로 javascript 호출(ajax)
+
+
+
+
+
+## 참고
+
+- https://getinthere.tistory.com/
+- 유튜브 채널:  데어 프로그래밍
+
+
+
+
+
 
 
 
