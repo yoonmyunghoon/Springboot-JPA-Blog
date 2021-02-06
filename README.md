@@ -134,7 +134,7 @@ public User updateUser(@PathVariable int id, @RequestBody User requestUser) {
   - Get, Post, Put, Delete 요청도 가능함
   - 사용은 안할거
 
-### 3. 스프링 컨트롤러의 파싱 전략 1
+#### 3. 스프링 컨트롤러의 파싱 전략 1
 
 - 스프링 컨트롤러는 key=value 형태의 데이터를 받으면 자동으로 파싱해서 변수에 담아줌(매개변수)
 - get 요청(key=value 형태)
@@ -148,18 +148,18 @@ public String home(String username, String email) {
 }
 ```
 
-### 4. 스프링 컨트롤러의 파싱 전략 2
+#### 4. 스프링 컨트롤러의 파싱 전략 2
 
 - 스프링은 key=value 형태의 데이터를 오브젝트로 파싱해서 받아주는 역할도 함
 - 주의할점은 setter가 없으면 스프링이 파싱해서 넣어주지 못함
   - 해당 데이터를 파싱해서 setter를 사용해서 오브젝트를 만들어줌
 
-### 5. key=value 형태가 아닌 데이터는 어떻게 파싱할까?
+#### 5. key=value 형태가 아닌 데이터는 어떻게 파싱할까?
 
 - 이런 데이터는 자동적으로 파싱이 안되기 때문에 @RequestBody 어노테이션을 붙여서 받아줘야함
 - @RequestBody를 붙이면 MessageConverter 클래스를 구현한 Jackson 라이브러리가 발동하면서 json 데이터를 자바 오브젝트로 파싱하여 받아줌
 
-### 6. form 태그로 json데이터 요청방법
+#### 6. form 태그로 json데이터 요청방법
 
 - jsp나 html에서 form태그를 작성하고 button으로 javascript 호출(ajax)
 
