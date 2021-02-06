@@ -29,6 +29,7 @@ let index = {
 			// console.log(resp);
 			location.href = "/blog";
 		}).fail(function(error){
+			// console.log(error);
 			alert(JSON.stringify(error));
 		});
     }
