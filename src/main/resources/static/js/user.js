@@ -3,6 +3,9 @@ let index = {
         $("#btn-save").on("click", ()=>{ // ''function(){}'' 대신에 화살표함수인 ''()=>{}''를 쓰는 이유: this를 바인딩하기 위해서 
             this.save();
         });
+		$("#btn-login").on("click", ()=>{
+            this.login();
+        });
     },
 
     save: function(){
@@ -30,6 +33,26 @@ let index = {
 			location.href = "/blog";
 		}).fail(function(error){
 			// console.log(error);
+			alert(JSON.stringify(error));
+		});
+    },
+
+	login: function(){
+		let data = {
+			username: $("#username").val(),
+			password: $("#password").val(),
+		};
+		
+		$.ajax({
+			type: "POST",
+			url: "/blog/api/user/login",
+			data: JSON.stringify(data),
+			contentType: "application/json; charset=utf-8", 
+			dataType: "json"
+		}).done(function(resp){
+			alert("로그인이 완료되었습니다.");
+			location.href = "/blog";
+		}).fail(function(error){
 			alert(JSON.stringify(error));
 		});
     }
