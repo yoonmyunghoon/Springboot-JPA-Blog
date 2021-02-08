@@ -11,7 +11,7 @@ public interface UserRepository extends JpaRepository<User, Integer>{
 	// JPA Naming 전략
 	// findBy를 사용하면 
 	// SELECT * FROM user WHERE username = ?1 AND password = ?2; 이런 쿼리를 날려주는 함수를 자동으로 만들어줌 
-	User findByUsernameAndPassword(String username, String password);
+	//	User findByUsernameAndPassword(String username, String password);
 	
 	// 이렇게 쿼리를 직접 써서 만들어줄 수도 있음 
 	//	@Query(value = "SELECT * FROM user WHERE username = ?1 AND password = ?2", nativeQuery = true)
