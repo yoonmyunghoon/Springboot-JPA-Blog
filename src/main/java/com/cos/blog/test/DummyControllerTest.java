@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cos.blog.model.Board;
 import com.cos.blog.model.RoleType;
 import com.cos.blog.model.User;
+import com.cos.blog.repository.BoardRepository;
 import com.cos.blog.repository.UserRepository;
 
 
@@ -32,6 +34,9 @@ public class DummyControllerTest {
 	
 	@Autowired // 의존성 주입
 	private UserRepository userRepository;
+	
+	@Autowired
+	private BoardRepository boardRepository;
 	
 	@DeleteMapping("/dummy/user/{id}")
 	public String delete(@PathVariable int id) {
@@ -82,11 +87,18 @@ public class DummyControllerTest {
 	
 	// 한 페이지 당 2건의 데이터를 리턴 받아보자
 	@GetMapping("/dummy/user")
-	public List<User> pageList(@PageableDefault(size = 2, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+	public Page<User> pageList(@PageableDefault(size = 2, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 		// 필요한 로직이 있으면 Page를 사용해서 처리하고 최종적으로는 content만 리턴
 		Page<User> pagingUser = userRepository.findAll(pageable);
 		List<User> users = pagingUser.getContent();
-		return users;
+		return pagingUser;
+	}
+	
+	@GetMapping("/dummy/board")
+	public Page<Board> boardPageList(@PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+		// 필요한 로직이 있으면 Page를 사용해서 처리하고 최종적으로는 content만 리턴
+		Page<Board> pagingBoard = boardRepository.findAll(pageable);
+		return pagingBoard;
 	}
 	
 	// {}를 사용하면 주소를 통해 변수값을 전달 받을 수 있음

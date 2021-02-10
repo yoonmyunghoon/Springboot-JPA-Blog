@@ -40,7 +40,6 @@ public class Board {
 	@Lob // 대용량 데이터
 	private String content; // 섬머노트 라이브러리를 사용할 예정, html 태그가 섞여서 디자인이 되기 때문에 용량이 클 것으로 예상됨 
 	
-	@ColumnDefault("0")
 	private int count; // 조회수
 	
 	// ManyToOne은 fetch = FetchType.EAGER가 Default
