@@ -78,3 +78,6 @@ Temporary Items
 .apdisk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos
+
+**/kakao_button.jsp
+**/kakao.properties
