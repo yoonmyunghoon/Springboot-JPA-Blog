@@ -453,6 +453,49 @@ public String home(String username, String email) {
 
 
 
+## 10. 스프링 시큐리티 세션 등록 과정
+
+- 스프링 시큐리티를 사용하지 않을 때는 그냥 세션에 user 객체를 직접 넣어서 로그인 상태 관리를 했음
+- 스프링 시큐리티를 사용하면 세션에 특정 공간(시큐리티 컨텍스트)을 만들어서 특정 객체(Authentication)를 넣어서 로그인 상태 관리를 함
+- 이때 Authentication 객체는 AuthenticationManager가 만들어줌
+  - AuthenticationManager가 Authentication 객체를 만들기 위해서는 username과 password를 사용해서 DB에 있는 사용자인지 확인하는 과정이 필요함
+    - 일반적으로 로그인 할 때도 해당 user가 DB에 있는 사용자인지 확인하고나서 세션에 등록해주니까 똑같은 과정이라고 생각하면됨
+- 처음부터 과정을 살펴보자
+  - 제일 먼저, 사용자가 로그인 요청을 함
+    - username과 password를 날림
+  - AuthenticationFilter가 요청을 가로채서 UsernamePasswordAuthentication Token을 만듬
+    - username과 password를 기반으로 만들어짐
+    - 이렇게 만들어진 토큰을 AuthenticationManager에게 전달해주면 AuthenticationManager가 세션에 user에 대한 정보를 저장해주는 것임
+- AuthenticationManager가 해당 user의 세션을 만들어주기 위해서는 조건을 통과해야함
+  - username을 userDetailsService(이 프로젝트에서는 principalDetailService를 말함, userDetailsService를 상속하고 있음)에게 전달함
+    - userDetailsService가 DB에게 해당 username을 가진 user 데이터가 있는지 질의를 함
+    - 있다는 것이 확인되면 AuthenticationManager에게 알려줌
+  - AuthenticationManager는 비밀번호를 설정해둔 암호화 방식대로(BCryptPasswordEncoder로 설정해둠) 암호화를 하고 다시 DB에 질의를 함
+  - 전부 다 확인이 되고 나면 Authenticaion 객체를 만들어서 시큐리티 컨텍스트에 등록을 함
+- 만약 시큐리티 컨텍스트에 있는 세션을 변경하려고 하면 Authentication 객체를 직접 만들어서 변경해줘야함
+
+```java
+@PutMapping("/user")
+public ResponseDto<Integer> update(@RequestBody User user) {
+  userService.회원수정(user);
+
+  // 요청으로 받은 변경된 정보를 가지고 있는 user 객체를 사용해서 토큰을 만들어서 이를 통해 Authentication객체를 만들고 세션에 저장
+  Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+  SecurityContext securityContext = SecurityContextHolder.getContext();
+  securityContext.setAuthentication(authentication);
+
+  return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
+}
+```
+
+
+
+
+
+
+
+
+
 ## 참고
 
 - https://getinthere.tistory.com/
