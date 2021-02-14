@@ -33,9 +33,12 @@ let index = {
 			dataType: "json" // 응답이 왔을 때(기본적으로 응답은 문자열 형태임), 생긴게 json 모양이라면 javascript 오브젝트로 변경해줌
 			// 이 결과가 밑에 함수들의 매개변수에 들어감
 		}).done(function(resp){
-			alert("회원가입이 완료되었습니다.");
-			// console.log(resp);
-			location.href = "/";
+			if (resp.status === 500) {
+				alert("회원가입에 실패하였습니다.");
+			} else {
+				alert("회원가입이 완료되었습니다.");
+				location.href = "/";
+			}
 		}).fail(function(error){
 			// console.log(error);
 			alert(JSON.stringify(error));

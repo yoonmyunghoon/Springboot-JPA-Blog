@@ -3,6 +3,7 @@ package com.cos.blog.model;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,9 +14,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,8 +51,10 @@ public class Board {
 	private User user; // DB는 오브젝트를 저장할 수 없음(FK를 사용해야함) - 자바는 오브젝트를 저장할 수 있음 -> 충돌이 발생하게 됨 -> JPA가 해결
 	
 	// OneToMany은 fetch = FetchType.LAZY가 Default, 여기서는 SELECT했을 때 바로 받아올 수 있도록 EAGER 사용
-	@OneToMany(mappedBy = "board", fetch = FetchType.EAGER) // mappedBy가 있으면 연관관계의 주인이 아님을 의미(FK가 아니므로 DB에 컬럼을 만들지 말라는 의미)
-	private List<Reply> reply;
+	@OneToMany(mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) // mappedBy가 있으면 연관관계의 주인이 아님을 의미(FK가 아니므로 DB에 컬럼을 만들지 말라는 의미)
+	@JsonIgnoreProperties({"board"})
+	@OrderBy("id desc")
+	private List<Reply> replys;
 	
 	@CreationTimestamp
 	private Timestamp createDate;
