@@ -4,16 +4,27 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+
+import com.cos.blog.model.KakaoProfile;
+import com.cos.blog.model.OAuthToken;
+import com.cos.blog.model.User;
+import com.cos.blog.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // 인증이 안된 사용자들이 출입할 수 있는 경로로 /auth/** 로 허용
 // 그냥 주소가 / 이면 index.jsp로 가는 것도 허용
@@ -22,6 +33,15 @@ import org.springframework.web.client.RestTemplate;
 
 @Controller
 public class UserController {
+	
+	@Value("${cos.key}")
+	private String cosKey;
+	
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
 	@GetMapping("/auth/joinForm")
 	public String joinForm() {
@@ -39,7 +59,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/auth/kakao/callback")
-	public @ResponseBody String kakaoCallback(String code) throws IOException  { // Data를 리턴해주는 컨트롤러 함수가 됨
+	public String kakaoCallback(String code) throws IOException  {
 		
 		// HttpBody에 들어갈 값을 외부파일에서 가져오기
 		Properties properties = new Properties();
@@ -80,7 +100,54 @@ public class UserController {
 				String.class
 				);
 		
-		return "카카오 토큰 요청 완료 : 토큰 요청에 대한 응답 => " + response;
+		// Gson, Json Simple, ObjectMapper 등 오브젝트에 json 데이터를 넣는 방법이 있음
+		ObjectMapper objectMapper = new ObjectMapper();
+		OAuthToken oauthToken = objectMapper.readValue(response.getBody(), OAuthToken.class);
 		
+		// accessToken을 사용해서 사용자 정보 받기
+		RestTemplate rt2 = new RestTemplate();
+		HttpHeaders headers2 = new HttpHeaders();
+		headers2.add("Authorization", "Bearer "+oauthToken.getAccess_token());
+		headers2.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+		
+		HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest = 
+				new HttpEntity<>(headers2);
+		
+		ResponseEntity<String> response2 = rt2.exchange(
+				"https://kapi.kakao.com/v2/user/me",
+				HttpMethod.POST,
+				kakaoProfileRequest,
+				String.class
+				);
+		
+		ObjectMapper objectMapper2 = new ObjectMapper();
+		KakaoProfile kakaoProfile = objectMapper2.readValue(response2.getBody(), KakaoProfile.class);
+		
+		// 카카오에서 받은 user 정보를 User 객체에 통합해줘야함
+		// 필요한 User 오브젝트의 속성에는 username, password, email 이 있음
+		// id과 createDate는 자동으로 생성, role은 USER로 해줄거임
+		User kakaoUser = User.builder()
+				.username(kakaoProfile.getKakao_account().getEmail()+"_"+kakaoProfile.getId())
+				.password(cosKey)
+				.email(kakaoProfile.getKakao_account().getEmail())
+				.oauth("kakao")
+				.build();
+		
+		// 이미 가입된 사용자인지 체크해서 처리
+		User originUser = userService.회원찾기(kakaoUser.getUsername());
+		
+		if (originUser.getUsername() == null) {
+			System.out.println("기존 회원이 아니기에 자동 회원가입을 진행합니다.");
+			userService.회원가입(kakaoUser);
+		}
+		
+		// 로그인 처리
+		System.out.println("자동 로그인을 진행합니다.");
+		Authentication authentication = authenticationManager
+				.authenticate(new UsernamePasswordAuthenticationToken(kakaoUser.getUsername(), cosKey));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		
+		
+		return "redirect:/";
 	}
 }

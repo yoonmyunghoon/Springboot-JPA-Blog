@@ -22,11 +22,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	@Autowired
 	private PrincipalDetailService principalDetailService;
 	
-//	@Bean
-//	@Override
-//	public AuthenticationManager authenticationManagerBean() throws Exception {
-//		return super.authenticationManagerBean();
-//	}
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
+	}
 
 	@Bean // IoC가 됨
 	public BCryptPasswordEncoder encodePWD() {
